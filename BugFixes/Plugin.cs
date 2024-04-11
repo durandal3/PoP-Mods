@@ -1,6 +1,7 @@
 ﻿using BepInEx;
-using BepInEx.Logging;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace BugFixes
 {
@@ -8,13 +9,69 @@ namespace BugFixes
     public class Plugin : BaseUnityPlugin
     {
 
-        internal static ManualLogSource Log;
-
         private void Awake()
         {
-            Log = base.Logger;
-            // Plugin startup logic
-            Harmony.CreateAndPatchAll(typeof(Patches));
+            Harmony.CreateAndPatchAll(typeof(Plugin));
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(FarmPairing))]
+        [HarmonyPatch(nameof(FarmPairing.breedCharacters))]
+        static IEnumerable<CodeInstruction> BreedCharactersPussyInterest(IEnumerable<CodeInstruction> instructions)
+        {
+            // FarmPairing.breedCharacters has a couple places like:
+            // if (this.a.character.hasCock())
+            // {
+            //     this.b.character.changeCockInterest(global::UnityEngine.Random.Range(num8 - 3, num8 + 3));
+            // }
+            // if (this.a.character.hasCock())
+            // {
+            //     this.b.character.changePussyInterest(global::UnityEngine.Random.Range(num8 - 3, num8 + 3));
+            // }
+            // Fix the second check for raising pussy interest to check for pussy, instead of cock
+
+
+            var hasCockMethodCall = new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Stats), "hasCock"));
+            var hasPussyMethod = AccessTools.Method(typeof(Stats), "hasPussy");
+            return new CodeMatcher(instructions)
+                    .MatchForward(false, hasCockMethodCall)
+                    .Advance(1)
+                    .MatchForward(false, hasCockMethodCall)
+                    .SetOperandAndAdvance(hasPussyMethod)
+                    .MatchForward(false, hasCockMethodCall)
+                    .Advance(1)
+                    .MatchForward(false, hasCockMethodCall)
+                    .SetOperandAndAdvance(hasPussyMethod)
+                    .InstructionEnumeration();
+        }
+
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(Brothel))]
+        [HarmonyPatch(nameof(Brothel.getRandomRichness))]
+        static IEnumerable<CodeInstruction> GetRandomRichness(IEnumerable<CodeInstruction> instructions)
+        {
+            // Brothel.getRandomRichness has a couple places like:
+            // int num2 = this.customers.poor.getTotal() * 100 / num;
+            // int num3 = this.customers.poor.getTotal() * 100 / num;
+            // Fix the second check for to get average customers
+
+
+            var poorCustomerFieldLoad = new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(PopulationGroup), "poor"));
+            var averageCustomerField = AccessTools.Field(typeof(PopulationGroup), "average");
+            return new CodeMatcher(instructions)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .Advance(1)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .Advance(1)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .SetOperandAndAdvance(averageCustomerField)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .Advance(1)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .Advance(1)
+                    .MatchForward(false, poorCustomerFieldLoad)
+                    .SetOperandAndAdvance(averageCustomerField)
+                    .InstructionEnumeration();
         }
     }
 }
