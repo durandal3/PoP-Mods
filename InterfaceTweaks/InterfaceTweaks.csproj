@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <AssemblyName>SexTrainingFilter</AssemblyName>
-    <Description>Add filtering to the Sex-Training tab for MC sex skill max level</Description>
+    <AssemblyName>InterfaceTweaks</AssemblyName>
+    <Description>Collection of interface additions to improve QoL</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>

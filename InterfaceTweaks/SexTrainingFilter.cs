@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using BepInEx;
@@ -8,21 +8,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace SexTrainingFilter
+namespace InterfaceTweaks
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
-    public class Plugin : BaseUnityPlugin
+    public class SexTrainingFilter
     {
-        internal static ManualLogSource Log;
-
         private static int currentFilter = -1;
-
-        private void Awake()
-        {
-            Log = base.Logger;
-            currentFilter = -1;
-            Harmony.CreateAndPatchAll(typeof(Plugin));
-        }
 
         private class FilterClickListener : MonoBehaviour, IPointerClickHandler
         {
@@ -78,7 +68,8 @@ namespace SexTrainingFilter
             var smcs = TownInterfaceController.instance.sexMainCharacterStats;
             for (int i = 0; i < smcs.Length; i++)
             {
-                if (smcs[i].activeSelf) {
+                if (smcs[i].activeSelf)
+                {
                     var label = smcs[i].GetComponentsInChildren<TMP_Text>()[2];
                     label.gameObject.SetActive(false);
                     if (i == currentFilter)
