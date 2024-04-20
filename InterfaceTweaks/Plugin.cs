@@ -18,6 +18,7 @@ namespace InterfaceTweaks
             Log = base.Logger;
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
         }
 
         private void OnDestroy()
