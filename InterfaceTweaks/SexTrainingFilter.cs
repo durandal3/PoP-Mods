@@ -96,7 +96,7 @@ namespace InterfaceTweaks
                     .Advance(1)
                     .Insert(new CodeInstruction[] {
                         new CodeInstruction(OpCodes.Ldloc_0),
-                        new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Plugin), nameof(Plugin.FilterList))),
+                        new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(SexTrainingFilter), nameof(FilterList))),
                         new CodeInstruction(OpCodes.Stloc_0)
                     })
                     .InstructionEnumeration();
