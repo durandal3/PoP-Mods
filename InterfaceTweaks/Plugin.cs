@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using TMPro;
@@ -15,9 +16,19 @@ namespace InterfaceTweaks
 
         private static List<Harmony> _harmony = [];
 
+        public static ConfigEntry<bool> showUnlockableTraits;
+        public static ConfigEntry<bool> highlightUnlockableSpecies;
+
         private void Awake()
         {
             Log = base.Logger;
+
+            showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
+                    "Whether to show unlockable traits in a tooltip in the new game screen (\"GeneticTraits\" on starter selection screen)");
+            highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
+                    "Whether to highlight unlockable species (in portals, combats, tavern hires, and character overview)");
+
+
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));

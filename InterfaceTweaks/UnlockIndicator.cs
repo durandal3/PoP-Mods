@@ -54,6 +54,10 @@ namespace InterfaceTweaks
         [HarmonyPrefix]
         public static void UpdateAura(OWParty __instance, ref bool __runOriginal)
         {
+            if (!Plugin.highlightUnlockableSpecies.Value)
+            {
+                return;
+            }
             bool hasUnlocks = false;
             foreach (var character in __instance.info.characters)
             {
@@ -73,6 +77,10 @@ namespace InterfaceTweaks
 
         private static void UpdateBattleAura(Character character)
         {
+            if (!Plugin.highlightUnlockableSpecies.Value)
+            {
+                return;
+            }
             if (character.IsPlayerChar)
             {
                 return;
@@ -105,6 +113,10 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowNoticeBoardTab(int index, TownInterfaceController __instance)
         {
+            if (!Plugin.highlightUnlockableSpecies.Value)
+            {
+                return;
+            }
             // Highlight characters in the tavern that have unlockables
             if (index == 8) // 8 is the index of the hire tab
             {
@@ -128,6 +140,10 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowLockedSpeciesInCharacterOverview(int v, QuickCharacterInfo __instance)
         {
+            if (!Plugin.highlightUnlockableSpecies.Value)
+            {
+                return;
+            }
             if (v != 0)
             {
                 return;
@@ -159,8 +175,12 @@ namespace InterfaceTweaks
         {
             if (showingTraitTooltip)
             {
-                pos = ToolTipManager.Position.BotLeft;
                 showingTraitTooltip = false;
+                if (!Plugin.showUnlockableTraits.Value)
+                {
+                    return;
+                }
+                pos = ToolTipManager.Position.BotLeft;
                 int count = 0;
                 foreach (var t in Enum.GetValues(typeof(GeneticTraitType)))
                 {
