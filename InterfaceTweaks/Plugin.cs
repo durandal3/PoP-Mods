@@ -14,18 +14,15 @@ namespace InterfaceTweaks
     {
         internal static ManualLogSource Log;
 
-        private static List<Harmony> _harmony = [];
+        private static readonly List<Harmony> _harmony = [];
 
         public static ConfigEntry<bool> showUnlockableTraits;
         public static ConfigEntry<bool> highlightUnlockableSpecies;
-        public static ConfigEntry<bool> showExtraAp;
 
         private void Awake()
         {
             Log = base.Logger;
 
-            showExtraAp = Config.Bind("General", "ShowExtraAP", true,
-                    "On will add extra AP icons for characters with over 2 AP");
             showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
                     "Whether to show unlockable traits in a tooltip in the new game screen (\"GeneticTraits\" on starter selection screen)");
             highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
@@ -79,26 +76,14 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowExtraAp(Character c, InterfaceController __instance)
         {
-            if (!showExtraAp.Value)
-            {
-                return;
-            }
-            for (int j = 2; j < c.stats.CurrAp; j++)
-            {
-                GameObject gameObject = Instantiate(__instance.actionPointPrefab, __instance.actionPointRoster.transform);
-                gameObject.transform.localScale = Vector3.one;
-                gameObject.GetComponent<Image>().sprite = __instance.fullAp;
-            }
+            var images = __instance.actionPointRoster.transform.GetComponentsInChildren<Image>();
+            SetImageApColors(c.stats.CurrAp, images);
         }
 
         [HarmonyPatch(typeof(InterfaceController), nameof(InterfaceController.updatePartyCharacter))]
         [HarmonyPostfix]
         public static void ShowExtraApInRoster(int id, InterfaceController __instance)
         {
-            if (!showExtraAp.Value)
-            {
-                return;
-            }
             for (int j = 0; j < __instance.partyCharacters.Count; j++)
             {
                 if (__instance.partyCharacters[j].stats.genetics.id == id)
@@ -106,13 +91,31 @@ namespace InterfaceTweaks
                     Stats stats = __instance.partyCharacters[j].stats;
                     GameObject partyPanel = __instance.partyCharacters[j].partyPanel;
                     Transform transform = partyPanel.GetComponentsInChildren<GridLayoutGroup>()[0].transform;
-                    for (int l = 2; l < stats.CurrAp; l++)
-                    {
-                        GameObject gameObject = Instantiate(__instance.actionPointPrefab, transform.transform);
-                        gameObject.transform.localScale = Vector3.one;
-                        gameObject.GetComponent<Image>().sprite = __instance.fullAp;
-                    }
+                    var images = transform.GetComponentsInChildren<Image>();
+                    SetImageApColors(stats.CurrAp, images);
                 }
+            }
+        }
+
+        private static void SetImageApColors(int ap, Image[] images)
+        {
+            Image ap1Image = images[images.Length - 2];
+            Image ap2Image = images[images.Length - 1];
+            if (ap >= 5)
+            {
+                ap1Image.color = new Color(1, 0, 0);
+            }
+            else if (ap >= 3)
+            {
+                ap1Image.color = new Color(0, 1, 0);
+            }
+            if (ap >= 6)
+            {
+                ap2Image.color = new Color(1, 0, 0);
+            }
+            else if (ap >= 4)
+            {
+                ap2Image.color = new Color(0, 1, 0);
             }
         }
     }
