@@ -18,11 +18,14 @@ namespace InterfaceTweaks
 
         public static ConfigEntry<bool> showUnlockableTraits;
         public static ConfigEntry<bool> highlightUnlockableSpecies;
+        public static ConfigEntry<bool> showExtraAp;
 
         private void Awake()
         {
             Log = base.Logger;
 
+            showExtraAp = Config.Bind("General", "ShowExtraAP", true,
+                    "On will add extra AP icons for characters with over 2 AP");
             showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
                     "Whether to show unlockable traits in a tooltip in the new game screen (\"GeneticTraits\" on starter selection screen)");
             highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
@@ -76,7 +79,10 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowExtraAp(Character c, InterfaceController __instance)
         {
-            // c.stats.CurrAp = 6;
+            if (!showExtraAp.Value)
+            {
+                return;
+            }
             for (int j = 2; j < c.stats.CurrAp; j++)
             {
                 GameObject gameObject = Instantiate(__instance.actionPointPrefab, __instance.actionPointRoster.transform);
@@ -89,6 +95,10 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowExtraApInRoster(int id, InterfaceController __instance)
         {
+            if (!showExtraAp.Value)
+            {
+                return;
+            }
             for (int j = 0; j < __instance.partyCharacters.Count; j++)
             {
                 if (__instance.partyCharacters[j].stats.genetics.id == id)
