@@ -16,6 +16,7 @@ namespace InterfaceTweaks
 
         private static readonly List<Harmony> _harmony = [];
 
+        public static ConfigEntry<bool> showDamagePreview;
         public static ConfigEntry<bool> showUnlockableTraits;
         public static ConfigEntry<bool> highlightUnlockableSpecies;
 
@@ -23,6 +24,8 @@ namespace InterfaceTweaks
         {
             Log = base.Logger;
 
+            showDamagePreview = Config.Bind("General", "ShowDamagePreview", true,
+                    "Shows a preview of damage dealt when attacking (only for direct attacks - doesn't work with aoe attacks or skills/items)");
             showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
                     "Whether to show unlockable traits in a tooltip in the new game screen (\"GeneticTraits\" on starter selection screen)");
             highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
@@ -30,6 +33,7 @@ namespace InterfaceTweaks
 
 
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(DamagePreview)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
         }
