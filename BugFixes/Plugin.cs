@@ -9,14 +9,20 @@ namespace BugFixes
     public class Plugin : BaseUnityPlugin
     {
 
+        private static Harmony _harmony;
+
         private void Awake()
         {
-            Harmony.CreateAndPatchAll(typeof(Plugin));
+            _harmony = Harmony.CreateAndPatchAll(typeof(Plugin));
+        }
+
+        private void OnDestroy()
+        {
+            _harmony?.UnpatchSelf();
         }
 
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FarmPairing))]
-        [HarmonyPatch(nameof(FarmPairing.breedCharacters))]
+        [HarmonyPatch(typeof(FarmPairing), nameof(FarmPairing.breedCharacters))]
         static IEnumerable<CodeInstruction> BreedCharactersPussyInterest(IEnumerable<CodeInstruction> instructions)
         {
             // FarmPairing.breedCharacters has a couple places like:
@@ -46,8 +52,7 @@ namespace BugFixes
         }
 
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(Brothel))]
-        [HarmonyPatch(nameof(Brothel.getRandomRichness))]
+        [HarmonyPatch(typeof(Brothel), nameof(Brothel.getRandomRichness))]
         static IEnumerable<CodeInstruction> GetRandomRichness(IEnumerable<CodeInstruction> instructions)
         {
             // Brothel.getRandomRichness has a couple places like:

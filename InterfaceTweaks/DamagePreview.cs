@@ -11,14 +11,19 @@ namespace InterfaceTweaks
 
         static GameObject previewObject = null;
 
+        public void OnDestroy()
+        {
+            RemoveLabel();
+        }
+
         [HarmonyPatch(typeof(MouseController), nameof(MouseController.targetTile))]
         [HarmonyPostfix]
         public static void TargetTile(BattleTile t, MouseController __instance)
         {
-            
+
             if (__instance.mode == MouseController.InputMode.characterSelected)
             {
-                if (__instance.SelectedCharacter != null && t.character != null && t.character != __instance.SelectedCharacter && t.character.IsPlayerChar != __instance.SelectedCharacter.IsPlayerChar && __instance.SelectedCharacter.isValidAttackTarget(t.character))
+                if (__instance.SelectedCharacter != null && t.character != null && t.character != __instance.SelectedCharacter)
                 {
                     RemoveLabel();
                     previewObject = Object.Instantiate(TileHighlighter.instance.TileHighlightPrefab, WorldController.instance.getWorldCoordinates(t.X, t.Y), Quaternion.identity);
@@ -33,8 +38,14 @@ namespace InterfaceTweaks
                     text.enableWordWrapping = false;
                     text.alignment = TextAlignmentOptions.Center;
                     text.fontStyle = FontStyles.Bold;
-                    text.text = GetAttackDamage(__instance.SelectedCharacter, t.character);
-                    text.color = new Color(1, 0, 0);
+                    text.fontSize += 10;
+                    text.text = GetAttackDamage(__instance.SelectedCharacter, t.character).ToString();
+
+                    text.color = new Color(1, 1, 1);
+                    text.fontSharedMaterial.EnableKeyword(ShaderUtilities.Keyword_Outline);
+                    text.outlineWidth = 0.125f;
+                    // text.outlineColor = new Color(0.5f, 0.5f, 0.5f);
+                    text.outlineColor = new Color(1f, 1f, 1f);
                 }
             }
         }
@@ -52,12 +63,13 @@ namespace InterfaceTweaks
         }
 
 
-        private static string GetAttackDamage(Character attacker, Character target)
+        private static DamageInfo GetAttackDamage(Character attacker, Character target)
         {
+            var info = new DamageInfo();
             DamageType damageType = attacker.stats.ModifiedDamageType;
             if (!attacker.canAttack())
             {
-                return "0";
+                return info;
             }
             if (!attacker.stats.MaxLust && !attacker.willBeDestroyed && !attacker.isStunned())
             {
@@ -79,17 +91,26 @@ namespace InterfaceTweaks
                 {
                     ignoreArmor = true;
                 }
-                return GetRecievedDamage(target, num2, damageType, ignoreArmor, false);
+                GetRecievedDamage(info, target, num2, damageType, ignoreArmor, false);
             }
-            return "0";
+            return info;
         }
 
-        private static string GetRecievedDamage(Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield)
+        private static void GetRecievedDamage(DamageInfo info, Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield)
         {
             if (val <= 0)
             {
-                return "0";
+                return;
             }
+            if (GameController.instance.hasGlobalPassive("GreenAgility", target.IsPlayerChar) && target.stats.hasTrait(SpecialTraits.GreenSkin))
+            {
+                info.dodgeChance += 25;
+            }
+            else if (GameController.instance.hasGlobalPassive("DodgeMastery", target.IsPlayerChar))
+            {
+                info.dodgeChance += 10;
+            }
+
             float num = (float)val;
             float num2 = 1f;
             if (target.stats.HalfLust)
@@ -125,18 +146,17 @@ namespace InterfaceTweaks
                 val *= 2;
             }
 
-            string ret = "";
             if (!ignoreShield && target.currentShield > 0)
             {
                 if (target.currentShield >= val)
                 {
-                    return val + "(s)";
+                    info.shieldDamage += val;
+                    return;
                 }
                 if (target.currentShield > 0)
                 {
-                    var baseDamage = val;
                     val -= target.currentShield;
-                    ret += (baseDamage - val) + "(s) + ";
+                    info.shieldDamage += target.currentShield;
                 }
             }
             if (type == DamageType.Fire)
@@ -168,35 +188,39 @@ namespace InterfaceTweaks
 
             float elementalDefMod = target.stats.getElementalDefMod(type);
             int num3 = (int)((float)val * elementalDefMod);
-            int num4 = GetRecievedDamageLoseHp(target, num3, ignoreArmor);
-
-            ret += num4;
-            if (GameController.instance.hasGlobalPassive("GreenAgility", target.IsPlayerChar) && target.stats.hasTrait(SpecialTraits.GreenSkin) && global::UnityEngine.Random.Range(0, 4) == 0)
-            {
-                LogController.instance.addMessage(target.stats.CharName + " avoided dmg");
-                return ret + " (may dodge)";
-            }
-            else if (GameController.instance.hasGlobalPassive("DodgeMastery", target.IsPlayerChar) && global::UnityEngine.Random.Range(0, 10) == 0)
-            {
-                LogController.instance.addMessage(target.stats.CharName + " avoided dmg");
-                return ret + " (may dodge)";
-            }
-            return ret;
+            GetRecievedDamageLoseHp(info, target, num3, ignoreArmor);
         }
 
-        private static int GetRecievedDamageLoseHp(Character target, int i, bool ignoreArmor = false)
+        private static void GetRecievedDamageLoseHp(DamageInfo info, Character target, int i, bool ignoreArmor = false)
         {
             if (target.stats.Invuln)
             {
-                LogController.instance.addMessage(target.stats.CharName + " is invulnerable");
-                return 0;
+                info.hpDamage = 0;
+                return;
             }
             int j = ignoreArmor ? i : (i - target.stats.getModifiedArmor());
             j = Mathf.Max(1, j);
-            // TODO note shadows will be removed to reduce damage?
-            // if (GameController.instance.hasTeamPerk(Species.ShadowGhost, 4, target.IsPlayerChar))
-            // {
-            // }
+            if (GameController.instance.hasTeamPerk(Species.ShadowGhost, 4, target.IsPlayerChar))
+            {
+                int shadowTiles = 0;
+                foreach (KeyValuePair<Point, BattleTile> keyValuePair in WorldController.instance.World.tiles)
+                {
+                    if (keyValuePair.Value.Type == BattleTile.TileType.shadow && keyValuePair.Value.character == null)
+                    {
+                        shadowTiles++;
+                    }
+                }
+                if (shadowTiles > j)
+                {
+                    info.shadowsDamage = j;
+                    j = 0;
+                }
+                else
+                {
+                    info.shadowsDamage = shadowTiles;
+                    j -= shadowTiles;
+                }
+            }
             if (j > 0 && GameController.instance.hasGlobalPassive("LightBarrier", target.IsPlayerChar) && target.getEffectDuration(global::Effect.Type.Enlightened) > 0)
             {
                 j /= 2;
@@ -209,30 +233,67 @@ namespace InterfaceTweaks
             {
                 j = 1;
             }
-            // TODO note mana absorption?
             if (target.effectIsAlreadyActive(global::Effect.Type.ShadowForm))
             {
-            //     if (j < target.stats.CurrMana)
-            //     {
-            //         j = 0;
-            //     }
-            //     else
-            //     {
-            //         j -= target.stats.CurrMana;
-            //     }
+                if (j < target.stats.CurrMana)
+                {
+                    info.mpDamage += j;
+                    j = 0;
+                }
+                else
+                {
+                    info.mpDamage += target.stats.CurrMana;
+                    j -= target.stats.CurrMana;
+                }
             }
-            // else if (target.stats.hasTrait(GeneticTraitType.Ethereal))
-            // {
-                // if (Mathf.Max(1, j / 2) < target.stats.CurrMana)
-                // {
-                //     j = Mathf.Max(1, j / 2);
-                // }
-                // else
-                // {
-                //     j -= target.stats.CurrMana;
-                // }
-            // }
-            return j;
+            else if (target.stats.hasTrait(GeneticTraitType.Ethereal))
+            {
+                if (Mathf.Max(1, j / 2) < target.stats.CurrMana)
+                {
+                    j = Mathf.Max(1, j / 2);
+                    info.mpDamage += j;
+                }
+                else
+                {
+                    info.mpDamage += target.stats.CurrMana;
+                    j -= target.stats.CurrMana;
+                }
+            }
+            info.hpDamage += j;
+        }
+
+        private class DamageInfo
+        {
+            public int shieldDamage = 0;
+            public int shadowsDamage = 0;
+            public int mpDamage = 0;
+            public int hpDamage = 0;
+
+            public int dodgeChance = 0;
+
+            public override string ToString()
+            {
+                var strings = new List<string>();
+                if (shieldDamage > 0)
+                {
+                    strings.Add("<color=#FFFFFF>" + shieldDamage + "</color>");
+                }
+                if (shadowsDamage > 0)
+                {
+                    strings.Add("<color=#000000>" + shadowsDamage + "</color>");
+                }
+                if (mpDamage > 0)
+                {
+                    strings.Add(Colors.getColor("mana") + mpDamage + "</color>");
+                }
+                if (hpDamage > 0)
+                {
+                    strings.Add(Colors.getColor("red") + hpDamage + "</color>");
+                }
+
+                string dodgeString = dodgeChance > 0 ? " <size=50%>(" + dodgeChance + "% dodge)</size>" : "";
+                return string.Join(" + ", strings) + dodgeString;
+            }
         }
     }
 }

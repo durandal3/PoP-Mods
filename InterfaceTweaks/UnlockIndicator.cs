@@ -151,7 +151,7 @@ namespace InterfaceTweaks
 
             if (HasUnlocks(__instance.character))
             {
-                __instance.GetComponentInChildren<TMP_Text>().text = "<color=green>U</color> " + __instance.GetComponentInChildren<TMP_Text>().text;
+                __instance.GetComponentInChildren<TMP_Text>().text = "<color=green>Gal</color> " + __instance.GetComponentInChildren<TMP_Text>().text;
             }
         }
 
