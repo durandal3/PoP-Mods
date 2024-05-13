@@ -20,6 +20,10 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void TargetTile(BattleTile t, MouseController __instance)
         {
+            if (!Plugin.showDamagePreview.Value)
+            {
+                return;
+            }
 
             if (__instance.mode == MouseController.InputMode.characterSelected)
             {
