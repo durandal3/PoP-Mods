@@ -1,7 +1,7 @@
 # Overview
 
 A collection of mods for Portals of Phereon. Tested with version 0.26.2.0 and 0.26.1.0, but may work on other versions.
-  - Interface Tweaks focusing on QoL improvements
+  - InterfaceTweaks - focusing on QoL improvements
     - Sex-Training filters, combat damage preview, and more
   - BugFixes
     - Various bug fixes
@@ -37,7 +37,7 @@ Various small updates interface updates
 
 ### BugFixes
 
-Fixes for bugs that's I've bothered to implement. Currently includes:
+Fixes for bugs that I've bothered to implement. Currently includes:
  - Fix pussy interest change for farm pairs to be based on if the partner has a pussy (originally, based on if partner has a cock)
  - Fix ratio of poor/medium/rich customers for brothel shows
 
