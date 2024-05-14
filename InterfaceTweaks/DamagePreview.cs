@@ -9,11 +9,11 @@ namespace InterfaceTweaks
     public class DamagePreview
     {
 
-        static GameObject previewObject = null;
+        static readonly List<GameObject> highlighters = [];
 
         public void OnDestroy()
         {
-            RemoveLabel();
+            RemoveHighlighters();
         }
 
         [HarmonyPatch(typeof(MouseController), nameof(MouseController.targetTile))]
@@ -29,27 +29,20 @@ namespace InterfaceTweaks
             {
                 if (__instance.SelectedCharacter != null && t.character != null && t.character != __instance.SelectedCharacter)
                 {
-                    RemoveLabel();
-                    previewObject = Object.Instantiate(TileHighlighter.instance.TileHighlightPrefab, WorldController.instance.getWorldCoordinates(t.X, t.Y), Quaternion.identity);
-                    previewObject.name = "Damage Preview";
-                    previewObject.GetComponent<SpriteRenderer>().sprite = null;
+                    RemoveHighlighters();
+                    var highlighter = CreateHighlighter(t);
+                    highlighter.name = "Damage Preview";
+                    highlighter.GetComponent<SpriteRenderer>().sprite = null;
 
-                    var p = previewObject.transform.position;
-                    previewObject.transform.position = new Vector3(p.x, p.y + 0.8f, 50);
+                    highlighter.GetComponentInChildren<TMP_Text>().text = GetAttackDamage(__instance.SelectedCharacter, t.character).ToString();
 
-
-                    var text = previewObject.GetComponentInChildren<TMP_Text>();
-                    text.enableWordWrapping = false;
-                    text.alignment = TextAlignmentOptions.Center;
-                    text.fontStyle = FontStyles.Bold;
-                    text.fontSize += 10;
-                    text.text = GetAttackDamage(__instance.SelectedCharacter, t.character).ToString();
-
-                    text.color = new Color(1, 1, 1);
-                    text.fontSharedMaterial.EnableKeyword(ShaderUtilities.Keyword_Outline);
-                    text.outlineWidth = 0.125f;
-                    // text.outlineColor = new Color(0.5f, 0.5f, 0.5f);
-                    text.outlineColor = new Color(1f, 1f, 1f);
+                    foreach (var passive in __instance.SelectedCharacter.stats.getPassives())
+                    {
+                        if (passive.type == Passives.Type.onAttack && passive.name == "LightningStrike")
+                        {
+                            LightningStrike(__instance.SelectedCharacter, t.character);
+                        }
+                    }
                 }
             }
         }
@@ -57,13 +50,37 @@ namespace InterfaceTweaks
         [HarmonyPatch(typeof(TileHighlighter), nameof(TileHighlighter.unhighlightEffect))]
         [HarmonyPatch(typeof(TileHighlighter), nameof(TileHighlighter.unHighlightAll))]
         [HarmonyPostfix]
-        public static void RemoveLabel()
+        public static void RemoveHighlighters()
         {
-            if (previewObject != null)
+            foreach (var highlighter in highlighters)
             {
-                Object.Destroy(previewObject);
-                previewObject = null;
+                Object.Destroy(highlighter);
             }
+            highlighters.Clear();
+        }
+
+        private static GameObject CreateHighlighter(BattleTile tile)
+        {
+            var highlighter = Object.Instantiate(TileHighlighter.instance.TileHighlightPrefab,
+                    WorldController.instance.getWorldCoordinates(tile.X, tile.Y), Quaternion.identity);
+
+            var text = highlighter.GetComponentInChildren<TMP_Text>();
+            var p = text.transform.position;
+            text.transform.position = new Vector3(p.x, p.y + 0.75f, 50);
+
+
+            text.enableWordWrapping = false;
+            text.alignment = TextAlignmentOptions.Top;
+            text.fontStyle = FontStyles.Bold;
+            text.fontSize += 10;
+
+            text.color = new Color(1, 1, 1);
+            text.fontSharedMaterial.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            text.outlineWidth = 0.125f;
+            text.outlineColor = new Color(1f, 1f, 1f);
+
+            highlighters.Add(highlighter);
+            return highlighter;
         }
 
 
@@ -95,12 +112,12 @@ namespace InterfaceTweaks
                 {
                     ignoreArmor = true;
                 }
-                GetRecievedDamage(info, target, num2, damageType, ignoreArmor, false);
+                GetReceivedDamage(info, target, num2, damageType, ignoreArmor, false);
             }
             return info;
         }
 
-        private static void GetRecievedDamage(DamageInfo info, Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield)
+        private static void GetReceivedDamage(DamageInfo info, Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield)
         {
             if (val <= 0)
             {
@@ -192,10 +209,10 @@ namespace InterfaceTweaks
 
             float elementalDefMod = target.stats.getElementalDefMod(type);
             int num3 = (int)((float)val * elementalDefMod);
-            GetRecievedDamageLoseHp(info, target, num3, ignoreArmor);
+            GetReceivedDamageLoseHp(info, target, num3, ignoreArmor);
         }
 
-        private static void GetRecievedDamageLoseHp(DamageInfo info, Character target, int i, bool ignoreArmor = false)
+        private static void GetReceivedDamageLoseHp(DamageInfo info, Character target, int i, bool ignoreArmor = false)
         {
             if (target.stats.Invuln)
             {
@@ -264,6 +281,26 @@ namespace InterfaceTweaks
                 }
             }
             info.hpDamage += j;
+        }
+
+        private static void LightningStrike(Character attacker, Character target)
+        {
+            int baseDamage = (int)((float)attacker.stats.getModifiedMagicStrength() * GameController.instance.getDamageMod(DamageType.Electric));
+            List<BattleTile> tilesInRange = WorldController.instance.getTilesInRange(target.stats.OnTile, 2, true, false);
+            foreach (BattleTile battleTile in tilesInRange)
+            {
+                if (battleTile.character != null && battleTile.character != attacker)
+                {
+                    var info = new DamageInfo();
+
+                    var highlighter = CreateHighlighter(battleTile);
+                    highlighter.name = "Damage Preview (LightningStrike)";
+                    highlighter.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.8f, 0, 0.8f); // Yellow highlight
+
+                    GetReceivedDamage(info, battleTile.character, baseDamage, DamageType.Electric, false, false);
+                    highlighter.GetComponentInChildren<TMP_Text>().text = info.ToString() + "<br><color=#FFFF00><size=50%>(2 random)</size></color>";
+                }
+            }
         }
 
         private class DamageInfo
