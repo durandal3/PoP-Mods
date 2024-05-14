@@ -11,7 +11,7 @@ namespace InterfaceTweaks
 
         static readonly List<GameObject> highlighters = [];
 
-        public void OnDestroy()
+        public static void OnDestroy()
         {
             RemoveHighlighters();
         }

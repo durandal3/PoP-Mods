@@ -14,6 +14,15 @@ namespace InterfaceTweaks
     {
         internal static ManualLogSource Log;
 
+        public static void PrintAllComponents(GameObject gameObject)
+        {
+            // Debug util
+            foreach (var c in gameObject.GetComponentsInChildren<object>())
+            {
+                Log.LogWarning(c.GetType() + ": " + c);
+            }
+        }
+
         private static readonly List<Harmony> _harmony = [];
 
         public static ConfigEntry<bool> showDamagePreview;
@@ -34,6 +43,7 @@ namespace InterfaceTweaks
 
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(DamagePreview)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
         }
@@ -44,6 +54,8 @@ namespace InterfaceTweaks
             {
                 item.UnpatchSelf();
             }
+            DamagePreview.OnDestroy();
+            SelectionMenuSorter.OnDestroy();
         }
 
 

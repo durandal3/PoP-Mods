@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using BepInEx;
-using BepInEx.Logging;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
