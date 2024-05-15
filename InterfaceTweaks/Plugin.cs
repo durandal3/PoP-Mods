@@ -43,6 +43,7 @@ namespace InterfaceTweaks
 
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(DamagePreview)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(ScrollingFixes)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
