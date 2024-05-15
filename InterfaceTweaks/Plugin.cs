@@ -93,8 +93,11 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void ShowExtraAp(Character c, InterfaceController __instance)
         {
-            var images = __instance.actionPointRoster.transform.GetComponentsInChildren<Image>();
-            SetImageApColors(c.stats.CurrAp, images);
+            if (c != null)
+            {
+                var images = __instance.actionPointRoster.transform.GetComponentsInChildren<Image>();
+                SetImageApColors(c.stats.CurrAp, images);
+            }
         }
 
         [HarmonyPatch(typeof(InterfaceController), nameof(InterfaceController.updatePartyCharacter))]
