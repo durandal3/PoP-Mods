@@ -95,10 +95,10 @@ namespace InterfaceTweaks
             if (!attacker.stats.MaxLust && !attacker.willBeDestroyed && !attacker.isStunned())
             {
                 bool ignoreArmor = false;
-                int num2 = attacker.stats.getModifiedStrength();
+                int num2 = attacker.stats.getModifiedStrength(true);
                 if (attacker.stats.hasTrait(GeneticTraitType.Telekinetic))
                 {
-                    num2 = Mathf.Max(attacker.stats.getModifiedStrength(), attacker.stats.getModifiedMagicStrength());
+                    num2 = Mathf.Max(attacker.stats.getModifiedStrength(true), attacker.stats.getModifiedMagicStrength());
                 }
                 if (!target.stats.isHumanoid && GameController.instance.hasTeamPerk(Species.Succubus, 5, attacker.IsPlayerChar))
                 {
@@ -112,12 +112,12 @@ namespace InterfaceTweaks
                 {
                     ignoreArmor = true;
                 }
-                GetReceivedDamage(info, target, num2, damageType, ignoreArmor, false);
+                GetReceivedDamage(info, target, num2, damageType, ignoreArmor, false, false);
             }
             return info;
         }
 
-        private static void GetReceivedDamage(DamageInfo info, Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield)
+        private static void GetReceivedDamage(DamageInfo info, Character target, int val, DamageType type, bool ignoreArmor, bool ignoreShield, bool multiplyByGlobalDmgModFirst)
         {
             if (val <= 0)
             {
@@ -130,6 +130,10 @@ namespace InterfaceTweaks
             else if (GameController.instance.hasGlobalPassive("DodgeMastery", target.IsPlayerChar))
             {
                 info.dodgeChance += 10;
+            }
+            if (multiplyByGlobalDmgModFirst)
+            {
+                val = (int)((float)val * GameController.instance.getDamageMod(type));
             }
 
             float num = (float)val;
@@ -297,7 +301,7 @@ namespace InterfaceTweaks
                     highlighter.name = "Damage Preview (LightningStrike)";
                     highlighter.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.8f, 0, 0.8f); // Yellow highlight
 
-                    GetReceivedDamage(info, battleTile.character, baseDamage, DamageType.Electric, false, false);
+                    GetReceivedDamage(info, battleTile.character, baseDamage, DamageType.Electric, false, false, false);
                     highlighter.GetComponentInChildren<TMP_Text>().text = info.ToString() + "<br><color=#FFFF00><size=50%>(2 random)</size></color>";
                 }
             }
