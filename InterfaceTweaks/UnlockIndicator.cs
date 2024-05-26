@@ -5,6 +5,7 @@ using Effect;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace InterfaceTweaks
@@ -156,6 +157,27 @@ namespace InterfaceTweaks
         }
 
 
+        private static string GetUnlockableTraitsString()
+        {
+            int count = 0;
+            string text = "";
+            foreach (var t in Enum.GetValues(typeof(GeneticTraitType)))
+            {
+                var gt = GeneticTrait.getTrait((GeneticTraitType)t);
+                if (IsUnlockableTrait(gt))
+                {
+                    text += "\n" + gt.getName() + ": " + gt.unlockInfo;
+                    count++;
+                    if (count > 15)
+                    {
+                        text += "\n...";
+                        break;
+                    }
+                }
+            }
+            return text;
+        }
+
         static bool showingTraitTooltip = false;
 
         [HarmonyPatch(typeof(ToolTipManager), nameof(ToolTipManager.showSetTooltip))]
@@ -181,22 +203,45 @@ namespace InterfaceTweaks
                     return;
                 }
                 pos = ToolTipManager.Position.BotLeft;
-                int count = 0;
-                foreach (var t in Enum.GetValues(typeof(GeneticTraitType)))
-                {
-                    var gt = GeneticTrait.getTrait((GeneticTraitType) t);
-                    if (IsUnlockableTrait(gt))
-                    {
-                        text += "\n" + gt.getName() + ": " + gt.unlockInfo;
-                        count++;
-                        if (count > 15)
-                        {
-                            text += "\n...";
-                            return;
-                        }
-                    }
-                }
+                text += GetUnlockableTraitsString();
             }
+        }
+
+        private class TraitTooltipListener : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+        {
+
+            public void OnPointerEnter(PointerEventData eventData)
+            {
+                ToolTipManager.instance.showTooltip(ToolTipManager.Position.BotRight, "Unlockable Traits:\n" + GetUnlockableTraitsString());
+            }
+
+            public void OnPointerExit(PointerEventData eventData)
+            {
+                ToolTipManager.instance.hideToolTip();
+            }
+        }
+
+
+        [HarmonyPatch(typeof(GalleryController), nameof(GalleryController.show))]
+        [HarmonyPostfix]
+        public static void ShowTraitTooltip2(GalleryController __instance)
+        {
+            if (__instance.window.transform.childCount > 8)
+            {
+                UnityEngine.Object.Destroy(__instance.window.transform.GetChild(8).gameObject);
+            }
+            if (!Plugin.showUnlockableTraits.Value)
+            {
+                return;
+            }
+            var orig = __instance.window.transform.GetChild(5).gameObject;
+            var traitIcon = UnityEngine.Object.Instantiate<GameObject>(orig, __instance.window.transform);
+
+            var p = traitIcon.transform.localPosition;
+            traitIcon.transform.localPosition = new Vector3(p.x, p.y - 30f, p.z);
+            traitIcon.GetComponent<TMP_Text>().SetText("T");
+
+            traitIcon.AddComponent<TraitTooltipListener>();
         }
     }
 }

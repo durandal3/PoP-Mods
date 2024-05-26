@@ -36,7 +36,7 @@ namespace InterfaceTweaks
             showDamagePreview = Config.Bind("General", "ShowDamagePreview", true,
                     "Shows a preview of damage dealt when attacking (only for basic attacks). White number = shield, Black number = shadow tiles, Blue number = mana, Red number = health");
             showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
-                    "Whether to show unlockable traits in a tooltip in the new game screen (\"GeneticTraits\" on starter selection screen)");
+                    "Whether to show unlockable traits in a tooltip (Top-left of gallery and new game \"GeneticTraits\" on starter selection screen)");
             highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
                     "Whether to highlight unlockable species (in portals, combats, tavern hires, and character overview)");
 
