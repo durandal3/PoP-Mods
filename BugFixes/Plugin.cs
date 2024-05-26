@@ -22,36 +22,6 @@ namespace BugFixes
         }
 
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(FarmPairing), nameof(FarmPairing.breedCharacters))]
-        static IEnumerable<CodeInstruction> BreedCharactersPussyInterest(IEnumerable<CodeInstruction> instructions)
-        {
-            // FarmPairing.breedCharacters has a couple places like:
-            // if (this.a.character.hasCock())
-            // {
-            //     this.b.character.changeCockInterest(global::UnityEngine.Random.Range(num8 - 3, num8 + 3));
-            // }
-            // if (this.a.character.hasCock())
-            // {
-            //     this.b.character.changePussyInterest(global::UnityEngine.Random.Range(num8 - 3, num8 + 3));
-            // }
-            // Fix the second check for raising pussy interest to check for pussy, instead of cock
-
-
-            var hasCockMethodCall = new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Stats), "hasCock"));
-            var hasPussyMethod = AccessTools.Method(typeof(Stats), "hasPussy");
-            return new CodeMatcher(instructions)
-                    .MatchForward(false, hasCockMethodCall)
-                    .Advance(1)
-                    .MatchForward(false, hasCockMethodCall)
-                    .SetOperandAndAdvance(hasPussyMethod)
-                    .MatchForward(false, hasCockMethodCall)
-                    .Advance(1)
-                    .MatchForward(false, hasCockMethodCall)
-                    .SetOperandAndAdvance(hasPussyMethod)
-                    .InstructionEnumeration();
-        }
-
-        [HarmonyTranspiler]
         [HarmonyPatch(typeof(Brothel), nameof(Brothel.getRandomRichness))]
         static IEnumerable<CodeInstruction> GetRandomRichness(IEnumerable<CodeInstruction> instructions)
         {
