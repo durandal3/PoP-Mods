@@ -30,7 +30,6 @@ namespace InterfaceTweaks
             var headerObj = CharacterManager.instance.genericChoiceWindow.transform.GetChild(1).gameObject;
             for (int i = headerObj.transform.childCount - 1; i >= 0; i--)
             {
-                Plugin.Log.LogWarning(headerObj.transform.GetChild(i));
                 UnityEngine.Object.Destroy(headerObj.transform.GetChild(i).gameObject);
             }
         }
@@ -58,7 +57,6 @@ namespace InterfaceTweaks
                 GameObject labelObj = UnityEngine.Object.Instantiate(__instance.genericChoicePrefab, headerObj.transform);
                 labelObj.name = "Sort Label";
 
-                var p = labelObj.transform.localPosition;
                 labelObj.transform.localPosition = new Vector2(-220, 55);
                 labelObj.GetComponentInChildren<Image>().rectTransform.sizeDelta = new Vector2(40 + (Enum.GetValues(typeof(SortOrder)).Length * 50), 40);
                 labelObj.GetComponentInChildren<Image>().color = new Color(100, 100, 50);

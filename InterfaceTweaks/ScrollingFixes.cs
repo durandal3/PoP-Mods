@@ -82,5 +82,13 @@ namespace InterfaceTweaks
         {
             FixAllChildren(__instance.characterTraitRoster);
         }
+
+
+        [HarmonyPatch(typeof(TownInterfaceController), nameof(TownInterfaceController.startGenericSelection))]
+        [HarmonyPostfix]
+        public static void StartGenericSelection(TownInterfaceController __instance)
+        {
+            FixAllChildren(__instance.genericSelectionRoster.gameObject);
+        }
     }
 }

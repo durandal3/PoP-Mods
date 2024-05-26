@@ -32,7 +32,7 @@ Various small updates interface updates
  - Add feature to home Sex-Training tab - you may now click on the info display for an MC part (e.g. Hands). This will filter the character views to only include species which can contribute to raising the max level for that part.
  - Optional highlight for species that you have not unlocked yet - will indicate characters in the character overview, hires in the tavern, enemies in battle, and overworld parties. Optional list of unlockable traits that are not unlocked yet. (both OFF by default)
  - Updated AP pips in combat to change color when over 2 AP
- - Fix scrolling in various menus (trait selection lists, char management selection lists)
+ - Fix scrolling in various menus (trait selection lists, char management selection lists, basic item market lists)
  - Add options for sorting selection lists in char management (things like adapt/learn trait, equip/use item...)
  - Make the character tooltip in the tavern hire screen easier to get to
 
