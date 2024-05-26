@@ -26,6 +26,7 @@ namespace InterfaceTweaks
         private static readonly List<Harmony> _harmony = [];
 
         public static ConfigEntry<bool> showDamagePreview;
+        public static ConfigEntry<bool> addSortButtons;
         public static ConfigEntry<bool> showUnlockableTraits;
         public static ConfigEntry<bool> highlightUnlockableSpecies;
 
@@ -35,6 +36,8 @@ namespace InterfaceTweaks
 
             showDamagePreview = Config.Bind("General", "ShowDamagePreview", true,
                     "Shows a preview of damage dealt when attacking (only for basic attacks). White number = shield, Black number = shadow tiles, Blue number = mana, Red number = health");
+            addSortButtons = Config.Bind("General", "AddSortButtons", true,
+                    "Add sort buttons to various lists");
             showUnlockableTraits = Config.Bind("General.Unlockables", "ShowUnlockableTraits", false,
                     "Whether to show unlockable traits in a tooltip (Top-left of gallery and new game \"GeneticTraits\" on starter selection screen)");
             highlightUnlockableSpecies = Config.Bind("General.Unlockables", "HighlightUnlockableSpecies", false,
@@ -44,9 +47,11 @@ namespace InterfaceTweaks
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(Plugin)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(DamagePreview)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(ScrollingFixes)));
-            _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
+
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(McTraitSorter)));
         }
 
         private void OnDestroy()
@@ -57,6 +62,7 @@ namespace InterfaceTweaks
             }
             DamagePreview.OnDestroy();
             SelectionMenuSorter.OnDestroy();
+            McTraitSorter.OnDestroy();
         }
 
 
