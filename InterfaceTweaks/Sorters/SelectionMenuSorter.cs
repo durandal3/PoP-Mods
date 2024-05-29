@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using HarmonyLib;
-using TMPro;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace InterfaceTweaks
 {
