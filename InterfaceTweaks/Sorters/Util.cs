@@ -118,6 +118,11 @@ namespace InterfaceTweaks
                         ToolTipManager.instance.addTooltipTo(buttonObj, "Cost order",
                                 ToolTipManager.Position.TopRight);
                         break;
+                    case SortOrder.PASSIVE_TYPE:
+                        tmpText.text = "T";
+                        ToolTipManager.instance.addTooltipTo(buttonObj, "Passive type (onAttack/onMove/etc...)",
+                                ToolTipManager.Position.TopRight);
+                        break;
                 }
 
                 Button button = buttonObj.GetComponentInChildren<Button>();
@@ -129,7 +134,7 @@ namespace InterfaceTweaks
 
         public enum SortOrder
         {
-            ORIGINAL, ALPHABETIC, RARITY, RARITY_ALPHABETIC, COST,
+            ORIGINAL, ALPHABETIC, RARITY, RARITY_ALPHABETIC, COST, PASSIVE_TYPE,
         }
 
         public static void ChangePosition(Transform transform, int dx, int dy)

@@ -61,6 +61,8 @@ namespace InterfaceTweaks
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SexTrainingFilter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(UnlockIndicator)));
 
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(CreateTransformMenuPassiveSorter)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(CreateTransformMenuSkillSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(McTraitSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(McProfessionSorter)));
@@ -74,6 +76,9 @@ namespace InterfaceTweaks
                 item.UnpatchSelf();
             }
             DamagePreview.OnDestroy();
+
+            CreateTransformMenuPassiveSorter.OnDestroy();
+            CreateTransformMenuSkillSorter.OnDestroy();
             SelectionMenuSorter.OnDestroy();
             McTraitSorter.OnDestroy();
             McProfessionSorter.OnDestroy();
