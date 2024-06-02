@@ -138,6 +138,14 @@ namespace InterfaceTweaks
             transform.localPosition = new Vector3(p.x + dx, p.y + dy, p.z);
         }
 
+        public static void PrintAllChildren(Transform transform)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                Plugin.Log.LogWarning(transform.GetChild(i));
+            }
+        }
+
         public class Marker : MonoBehaviour { }
     }
 }

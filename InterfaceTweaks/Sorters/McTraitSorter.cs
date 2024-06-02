@@ -10,7 +10,7 @@ namespace InterfaceTweaks
     public class McTraitSorter
     {
 
-        private static List<MainCharacterTrait> mcTraits = new List<MainCharacterTrait>();
+        private static List<MainCharacterTrait> mcTraits = [];
 
         public static void OnDestroy()
         {
@@ -23,13 +23,13 @@ namespace InterfaceTweaks
             {
                 return;
             }
-            foreach (var c in getParentTransform().GetComponentsInChildren<Util.Marker>())
+            foreach (var c in GetParentTransform().GetComponentsInChildren<Util.Marker>())
             {
                 UnityEngine.Object.Destroy(c.gameObject);
             }
         }
 
-        private static Transform getParentTransform()
+        private static Transform GetParentTransform()
         {
             return CharacterCreationManager.instance.mainCharacterTraitRoster.transform.parent.parent.parent;
         }
@@ -68,12 +68,11 @@ namespace InterfaceTweaks
             {
                 return;
             }
-            var parent = getParentTransform();
+            var parent = GetParentTransform();
             if (parent.GetComponentInChildren<Util.Marker>() == null)
             {
                 var traitLabel = parent.GetChild(9);
                 var professionPanel = parent.GetChild(6);
-                Util.ChangePosition(traitLabel, -20, 0);
                 Util.ChangePosition(professionPanel, 0, 10);
                 var rect = professionPanel.GetComponentInChildren<RectTransform>();
                 rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.sizeDelta.y - 20);
