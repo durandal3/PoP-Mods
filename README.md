@@ -33,8 +33,10 @@ Various small updates interface updates
  - Optional highlight for species that you have not unlocked yet - will indicate characters in the character overview, hires in the tavern, enemies in battle, and overworld parties. Optional list of unlockable traits that are not unlocked yet. (both OFF by default)
  - Updated AP pips in combat to change color when over 2 AP
  - Fix scrolling in various menus (trait selection lists, char management selection lists, basic item market lists)
- - Add options for sorting selection lists in char management (things like adapt/learn trait, equip/use item...)
+ - Add options for sorting various lists (trait lists in new game setup and Transform/Create dialog, other lists like adapt/learn trait, equip/use item...)
  - Make the character tooltip in the tavern hire screen easier to get to
+ - Add option to allow changing the WorldModifier in a new game (and also to allow changing it to ones normally only available in quick runs)
+ - Option for the default challenge level when setting up a new game
 
 
 ### BugFixes
