@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using UnityEngine;
@@ -78,24 +79,13 @@ namespace InterfaceTweaks
                     });
                     break;
                 case Util.SortOrder.RARITY:
-                    options.Sort((a, b) =>
-                    {
-                        var ar = GetRaritySort(a.name);
-                        var br = GetRaritySort(b.name);
-                        return ar - br;
-                    });
+                    options = Enumerable.OrderBy(options, (e) => GetRaritySort(e.name)).ToList();
                     break;
                 case Util.SortOrder.RARITY_ALPHABETIC:
-                    options.Sort((a, b) =>
-                    {
-                        var ar = GetRaritySort(a.name);
-                        var br = GetRaritySort(b.name);
-                        if (ar != br)
-                        {
-                            return ar - br;
-                        }
-                        return StripString(a.name).CompareTo(StripString(b.name));
-                    });
+                    options = Enumerable
+                            .OrderBy(options, (e) => StripString(e.name))
+                            .OrderBy((e) => GetRaritySort(e.name))
+                            .ToList();
                     break;
             }
 
