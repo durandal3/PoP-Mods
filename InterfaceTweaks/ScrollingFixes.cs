@@ -19,33 +19,31 @@ namespace InterfaceTweaks
 
         private static void FixButtonScrolling(GameObject gameObject)
         {
-            EventTrigger eventTrigger = gameObject.GetComponentInChildren<EventTrigger>();
-            if (eventTrigger == null)
+            foreach (EventTrigger eventTrigger in gameObject.GetComponentsInChildren<EventTrigger>())
             {
-                return;
+                // TODO maybe shouldn't do the drags? Will still trigger a click if the same button is under the mouse after the drag.
+                AddEvent(eventTrigger, EventTriggerType.BeginDrag, (e) =>
+                {
+                    eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnBeginDrag", e);
+                });
+                AddEvent(eventTrigger, EventTriggerType.Drag, (e) =>
+                {
+                    eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnDrag", e);
+                });
+                AddEvent(eventTrigger, EventTriggerType.EndDrag, (e) =>
+                {
+                    eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnEndDrag", e);
+                });
+                AddEvent(eventTrigger, EventTriggerType.Scroll, (e) =>
+                {
+                    eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnScroll", e);
+                });
             }
-            // TODO maybe shouldn't do the drags? Will still trigger a click if the same button is under the mouse after the drag.
-            AddEvent(eventTrigger, EventTriggerType.BeginDrag, (e) =>
-            {
-                eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnBeginDrag", e);
-            });
-            AddEvent(eventTrigger, EventTriggerType.Drag, (e) =>
-            {
-                eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnDrag", e);
-            });
-            AddEvent(eventTrigger, EventTriggerType.EndDrag, (e) =>
-            {
-                eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnEndDrag", e);
-            });
-            AddEvent(eventTrigger, EventTriggerType.Scroll, (e) =>
-            {
-                eventTrigger.gameObject.GetComponentInParent<ScrollRect>()?.SendMessage("OnScroll", e);
-            });
         }
 
         private static void AddEvent(EventTrigger eventTrigger, EventTriggerType type, Action<object> action)
         {
-            EventTrigger.Entry entry = new EventTrigger.Entry();
+            EventTrigger.Entry entry = new();
             entry.eventID = type;
             entry.callback.AddListener((e) => action(e));
             eventTrigger.triggers.Add(entry);
@@ -86,6 +84,24 @@ namespace InterfaceTweaks
         public static void StartGenericSelection(TownInterfaceController __instance)
         {
             FixAllChildren(__instance.genericSelectionRoster.gameObject);
+        }
+
+        [HarmonyPatch(typeof(TownInterfaceController), nameof(TownInterfaceController.showPortalTab))]
+        [HarmonyPostfix]
+        public static void ShowPortalTab(int index, TownInterfaceController __instance)
+        {
+            switch (index)
+            {
+                case 0:
+                    FixAllChildren(__instance.randomPortalRoster);
+                    break;
+                case 1:
+                    FixAllChildren(__instance.specialPortalRoster);
+                    break;
+                case 2:
+                    FixAllChildren(__instance.eventPortalRoster);
+                    break;
+            }
         }
     }
 }
