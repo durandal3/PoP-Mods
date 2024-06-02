@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using UnityEngine;
 
 namespace InterfaceTweaks
 {
@@ -54,7 +55,7 @@ namespace InterfaceTweaks
             }
             else
             {
-                Util.MakeSortButtons(headerObj.transform, 0, 30, ResortMenu, [
+                Util.MakeSortButtons(typeof(Marker), headerObj.transform, 0, 30, ResortMenu, [
                     Util.SortOrder.ORIGINAL,
                         Util.SortOrder.ALPHABETIC,
                         Util.SortOrder.RARITY,
@@ -131,5 +132,7 @@ namespace InterfaceTweaks
         {
             return Regex.Replace(str, "<.*?>", String.Empty);
         }
+
+        public class Marker : MonoBehaviour { }
     }
 }

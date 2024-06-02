@@ -31,11 +31,11 @@ namespace InterfaceTweaks
                     new Vector2(texture.width / 2, texture.height / 2));
         }
 
-        public static void MakeSortButtons(Transform parent, float startX, float startY, Action<SortOrder> sorter, List<SortOrder> sortOrders)
+        public static void MakeSortButtons(Type markerType, Transform parent, float startX, float startY, Action<SortOrder> sorter, List<SortOrder> sortOrders)
         {
             int buttonNum = 0;
 
-            GameObject panelFitter = new("Sort Panel", typeof(Marker), typeof(ContentSizeFitter));
+            GameObject panelFitter = new("Sort Panel", markerType, typeof(ContentSizeFitter));
             // GameObject panelFitter = new("Sort Panel", typeof(Marker));
             panelFitter.transform.SetParent(parent, false);
             panelFitter.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 30);
@@ -43,7 +43,7 @@ namespace InterfaceTweaks
             // panelFitter.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
 
-            GameObject panelObj = new("Sort Panel", typeof(Marker), typeof(Image), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+            GameObject panelObj = new("Sort Panel", markerType, typeof(Image), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
             panelObj.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             panelObj.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             panelObj.transform.SetParent(panelFitter.transform, false);
@@ -145,7 +145,5 @@ namespace InterfaceTweaks
                 Plugin.Log.LogWarning(transform.GetChild(i));
             }
         }
-
-        public class Marker : MonoBehaviour { }
     }
 }

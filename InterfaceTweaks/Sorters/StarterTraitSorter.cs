@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -25,7 +23,7 @@ namespace InterfaceTweaks
             {
                 return;
             }
-            foreach (var c in GetParentTransform().GetComponentsInChildren<Util.Marker>())
+            foreach (var c in GetParentTransform().GetComponentsInChildren<Marker>())
             {
                 UnityEngine.Object.Destroy(c.gameObject);
             }
@@ -83,22 +81,21 @@ namespace InterfaceTweaks
         [HarmonyPrefix]
         public static void CreateButtons()
         {
-            if (!Plugin.addSortButtons.Value)
-            {
-                return;
-            }
             var parent = GetParentTransform();
-            if (parent.GetComponentInChildren<Util.Marker>() == null)
+            if (parent.GetComponentInChildren<Marker>() == null)
             {
-                var traitLabel = parent.GetChild(12);
+                if (Plugin.addSortButtons.Value)
+                {
+                    var traitLabel = parent.GetChild(12);
 
-                Util.ChangePosition(traitLabel, -100, 0);
-                var p = traitLabel.localPosition;
-                Util.MakeSortButtons(parent, p.x + 150, p.y, DoStarterTraitSort, [
-                    Util.SortOrder.ORIGINAL,
+                    Util.ChangePosition(traitLabel, -100, 0);
+                    var p = traitLabel.localPosition;
+                    Util.MakeSortButtons(typeof(Marker), parent, p.x + 150, p.y, DoStarterTraitSort, [
+                        Util.SortOrder.ORIGINAL,
                         Util.SortOrder.ALPHABETIC,
                         Util.SortOrder.COST,
                     ]);
+                }
                 sortedTraits = new List<GeneticTraitType>(SaveController.instance.permanentInfo.availableStartingCharacterTraits);
             }
         }
@@ -106,7 +103,7 @@ namespace InterfaceTweaks
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(CharacterCreationManager), nameof(CharacterCreationManager.showTab))]
         [HarmonyPatch(typeof(CharacterCreationManager), nameof(CharacterCreationManager.selectStarterTrait))]
-        public static IEnumerable<CodeInstruction> UpdateMainCharacterTraitRosterTranspile(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> UpdateStarterTraitReference(IEnumerable<CodeInstruction> instructions)
         {
             // Change CharacterCreationManager.showTab/selectStarterTrait to get the trait list from this sortedTraits field
             // instead of the base list in SaveController
@@ -124,5 +121,7 @@ namespace InterfaceTweaks
                     )
                     .InstructionEnumeration();
         }
+
+        public class Marker : MonoBehaviour { }
     }
 }

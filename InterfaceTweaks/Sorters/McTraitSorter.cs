@@ -23,7 +23,7 @@ namespace InterfaceTweaks
             {
                 return;
             }
-            foreach (var c in GetParentTransform().GetComponentsInChildren<Util.Marker>())
+            foreach (var c in GetParentTransform().GetComponentsInChildren<Marker>())
             {
                 UnityEngine.Object.Destroy(c.gameObject);
             }
@@ -64,27 +64,25 @@ namespace InterfaceTweaks
         [HarmonyPostfix]
         public static void UpdateMainCharacterTraitRoster()
         {
-            if (!Plugin.addSortButtons.Value)
-            {
-                return;
-            }
             var parent = GetParentTransform();
-            if (parent.GetComponentInChildren<Util.Marker>() == null)
+            if (parent.GetComponentInChildren<Marker>() == null)
             {
-                var traitLabel = parent.GetChild(9);
-                var professionPanel = parent.GetChild(6);
-                Util.ChangePosition(professionPanel, 0, 10);
-                var rect = professionPanel.GetComponentInChildren<RectTransform>();
-                rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.sizeDelta.y - 20);
+                if (Plugin.addSortButtons.Value)
+                {
+                    var traitLabel = parent.GetChild(9);
+                    var professionPanel = parent.GetChild(6);
+                    Util.ChangePosition(professionPanel, 0, 10);
+                    var rect = professionPanel.GetComponentInChildren<RectTransform>();
+                    rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.sizeDelta.y - 20);
 
-
-                var p = traitLabel.localPosition;
-                Util.MakeSortButtons(parent, p.x + 70, p.y + 30, DoMcTraitSort, [
-                    Util.SortOrder.ORIGINAL,
+                    var p = traitLabel.localPosition;
+                    Util.MakeSortButtons(typeof(Marker), parent, p.x + 70, p.y + 30, DoMcTraitSort, [
+                        Util.SortOrder.ORIGINAL,
                         Util.SortOrder.ALPHABETIC,
                         Util.SortOrder.RARITY,
                         Util.SortOrder.COST,
                     ]);
+                }
                 mcTraits = new List<MainCharacterTrait>(SaveController.instance.permanentInfo.availableMainCharacterTraits);
             }
         }
@@ -109,5 +107,7 @@ namespace InterfaceTweaks
                     )
                     .InstructionEnumeration();
         }
+
+        public class Marker : MonoBehaviour { }
     }
 }

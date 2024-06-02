@@ -59,6 +59,7 @@ namespace InterfaceTweaks
 
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(SelectionMenuSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(McTraitSorter)));
+            _harmony.Add(Harmony.CreateAndPatchAll(typeof(McProfessionSorter)));
             _harmony.Add(Harmony.CreateAndPatchAll(typeof(StarterTraitSorter)));
         }
 
@@ -71,6 +72,7 @@ namespace InterfaceTweaks
             DamagePreview.OnDestroy();
             SelectionMenuSorter.OnDestroy();
             McTraitSorter.OnDestroy();
+            McProfessionSorter.OnDestroy();
             StarterTraitSorter.OnDestroy();
         }
 
