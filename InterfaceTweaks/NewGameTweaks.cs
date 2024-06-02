@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using TMPro;
 using UnityEngine.UI;
@@ -8,6 +10,21 @@ namespace InterfaceTweaks
 {
     public class NewGameTweaks
     {
+        [HarmonyPatch(typeof(CharacterCreationManager), "Start")]
+        [HarmonyPostfix]
+        public static void DefaultChallengeLevel(CharacterCreationManager __instance)
+        {
+            int level = Plugin.defaultChallengeRank.Value;
+
+            if (level >= 0)
+            {
+                var getHighestPossibleAscensionMethod = typeof(CharacterCreationManager).GetMethod("getHighestPossibleAscension", BindingFlags.NonPublic | BindingFlags.Instance);
+                typeof(CharacterCreationManager).GetField("ascensionSelected", BindingFlags.NonPublic | BindingFlags.Instance)
+                        .SetValue(__instance, Math.Min(level, (int)getHighestPossibleAscensionMethod.Invoke(__instance, [])));
+
+                __instance.updateAscension();
+            }
+        }
 
         [HarmonyPatch(typeof(CharacterCreationManager), "Start")]
         [HarmonyPostfix]
@@ -77,24 +94,30 @@ namespace InterfaceTweaks
 
                 __instance.worldModifier.GetComponentInChildren<TMP_Text>().text = "WorldModifier (click to change):\n<color=orange>" + SaveController.instance.WorldModifier + "</color>";
                 ToolTipManager.instance.hideToolTip();
+                __instance.showWorldModifierTooltip();
             });
             __instance.worldModifier.GetComponentInChildren<TMP_Text>().text = "WorldModifier (click to change):\n<color=orange>" + SaveController.instance.WorldModifier + "</color>";
         }
 
-        [HarmonyPatch(typeof(CharacterCreationManager), "Start")]
-        [HarmonyPostfix]
-        public static void DefaultChallengeLevel(CharacterCreationManager __instance)
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(CharacterCreationManager), nameof(CharacterCreationManager.confirm))]
+        public static IEnumerable<CodeInstruction> ConfirmDontResetWorldMod(IEnumerable<CodeInstruction> instructions)
         {
-            int level = Plugin.defaultChallengeRank.Value;
+            // Change CharacterCreationManager.confirm to not reset the world mod back to the one in permanentInfo
+            // Make it just set it to itself again (removing everything doesn't work because labels?)
 
-            if (level >= 0)
-            {
-                var getHighestPossibleAscensionMethod = typeof(CharacterCreationManager).GetMethod("getHighestPossibleAscension", BindingFlags.NonPublic | BindingFlags.Instance);
-                typeof(CharacterCreationManager).GetField("ascensionSelected", BindingFlags.NonPublic | BindingFlags.Instance)
-                        .SetValue(__instance, Math.Min(level, (int)getHighestPossibleAscensionMethod.Invoke(__instance, [])));
-
-                __instance.updateAscension();
-            }
+            return new CodeMatcher(instructions)
+                    .MatchForward(false, 
+                            new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(SaveController), nameof(SaveController.instance))),
+                            new CodeMatch(OpCodes.Ldsfld, AccessTools.Field(typeof(SaveController), nameof(SaveController.instance))),
+                            new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(SaveController), nameof(SaveController.instance.permanentInfo))),
+                            new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(PermanentInfo), nameof(SaveController.instance.permanentInfo.permanentWorldModifier))),
+                            new CodeMatch(OpCodes.Callvirt)
+                    )
+                    .Advance(2)
+                    .SetOperandAndAdvance(AccessTools.Field(typeof(SaveController), "worldModifier"))
+                    .RemoveInstruction()
+                    .InstructionEnumeration();
         }
     }
 }

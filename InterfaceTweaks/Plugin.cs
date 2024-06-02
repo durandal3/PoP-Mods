@@ -39,11 +39,11 @@ namespace InterfaceTweaks
 
             addSortButtons = Config.Bind("General", "AddSortButtons", true,
                     "Add sort buttons to various lists");
-            defaultChallengeRank = Config.Bind("General", "DefaultChallengeRank", -1,
+            defaultChallengeRank = Config.Bind("General.NewGameSetup", "ChallengeRankDefault", -1,
                     "Default Challenge rank to set when making a new game. -1 for default behaviour (1 less than max). If higher than your allowed max, will set to max (so set to e.g. 1000 to always set to max possible)");
-            allowChangingWorldMod = Config.Bind("General", "AllowChangingWorldMod", true,
+            allowChangingWorldMod = Config.Bind("General.NewGameSetup", "AllowChangingWorldMod", true,
                     "Allowing changing the World Modifier during new game setup");
-            allowChangingWorldModToAnything = Config.Bind("General", "AllowChangingWorldModToAnything", false,
+            allowChangingWorldModToAnything = Config.Bind("General.NewGameSetup", "AllowChangingWorldModToAnything", false,
                     "Allows setting the World Modifier to anything, not just those normally available through the Creation ending");
             showDamagePreview = Config.Bind("General.Combat", "ShowDamagePreview", true,
                     "Shows a preview of damage dealt when attacking (only for basic attacks). White number = shield, Black number = shadow tiles, Blue number = mana, Red number = health");
